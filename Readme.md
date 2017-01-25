@@ -3,3 +3,8 @@
 # psaws
 
 A module with some handy functions to do stuff on Amazon Web Services with PowerShell.
+
+## Requirements
+
+The AWS PowerShell module needs to be installed on the system for this module to function.
+`Install-Module -Name AwsPowerShell`
