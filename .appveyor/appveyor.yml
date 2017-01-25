@@ -3,9 +3,14 @@ branches:
   only:
   - master
 image: WMF 5
+environment:
+  psgallery_apiKey:
+    secure: QvpliMcd1+3wTCfqfwCJIDSLW8l3ejGWqjPRnLYKjc2TrFv6pKLAnHjPhKS4Ktbk
 install:
 - ps: >-
     Install-PackageProvider -Name NuGet -Force
+
+    Install-Module AwsPowerShell -Force
 
     Install-Module Pester -Force
 
@@ -24,3 +29,6 @@ test_script:
             throw "$($res.FailedCount) tests failed."
 
         }
+deploy_script:
+
+- ps: Publish-Module -Name psaws -NuGetApiKey $env:psgallery_apiKey -Verbose
