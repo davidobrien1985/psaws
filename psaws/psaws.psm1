@@ -1,10 +1,14 @@
-﻿Function Connect-AwsMfa {
+﻿
+Function Connect-AwsMfa {
   param (
-    [string]$region = 'ap-southeast-2',
+    [Parameter(mandatory=$true,HelpMessage='Specify the AWS region')]
+    [ValidateScript({$_ -cin ([Amazon.RegionEndpoint]::EnumerableAllRegions).SystemName})]
+    [string]$region,
     [string]$awsProfile = 'default',
     [Parameter(mandatory=$true,HelpMessage='Specify the user name associated with this profile and MFA token')]
     [string]$awsUserName,
     [Parameter(mandatory=$true,HelpMessage='Specify the MFA Token that is currently valid')]
+    [ValidateLength(6,6)]
     [string]$mfaToken
   )
   
