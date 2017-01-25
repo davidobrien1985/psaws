@@ -6,7 +6,9 @@ image: WMF 5
 install:
 - ps: >-
     Install-PackageProvider -Name NuGet -Force
+
     Install-Module Pester -Force
+
     Copy-Item -Path ./psaws -Destination "C:\Program Files\WindowsPowerShell\Modules\psaws" -Recurse
 build: off
 test_script:
