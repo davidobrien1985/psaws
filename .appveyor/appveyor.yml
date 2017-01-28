@@ -17,8 +17,7 @@ install:
     Copy-Item -Path ./psaws -Destination "C:\Program Files\WindowsPowerShell\Modules\psaws" -Recurse
 build: off
 test_script:
-  - ps: .\Tests\appveyor.pester.ps1 
-  - ps: powershell.exe -version 2.0 -executionpolicy bypass -noprofile -file .\tests\Appveyor.Pester.ps1 -Version 2
+  - ps: .\Tests\appveyor.pester.ps1
   - ps: powershell.exe -version 3.0 -executionpolicy bypass -noprofile -file .\tests\Appveyor.Pester.ps1 -Version 3
   - ps: powershell.exe -version 4.0 -executionpolicy bypass -noprofile -file .\tests\Appveyor.Pester.ps1 -Version 4
   - ps: powershell.exe -version 5.0 -executionpolicy bypass -noprofile -file .\tests\Appveyor.Pester.ps1 -Version 5
