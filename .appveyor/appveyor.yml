@@ -31,4 +31,4 @@ test_script:
         }
 deploy_script:
 
-- ps: Publish-Module -Name psaws -NuGetApiKey $env:psgallery_apiKey -Verbose
+- ps: if ($env:APPVEYOR_REPO_COMMIT_MESSAGE -eq '#deploy') {Publish-Module -Name psaws -NuGetApiKey $env:psgallery_apiKey -Verbose}
