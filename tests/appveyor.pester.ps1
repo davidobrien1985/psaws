@@ -47,6 +47,9 @@ if(-not $Finalize)
 
     Invoke-Pester -Path "$ProjectRoot\Tests" -OutputFormat NUnitXml -OutputFile "$ProjectRoot\$TestFile" -PassThru |
         Export-Clixml -Path "$ProjectRoot\PesterResults$PSVersion.xml"
+    [xml]$content = Get-Content "$ProjectRoot\PesterResults$PSVersion.xml"
+    $content.'test-results'.'test-suite'.type = "Powershell"
+    $content.Save("$ProjectRoot\PesterResults$PSVersion.xml")
 }
 
 #If finalize is specified, check for failures and 
