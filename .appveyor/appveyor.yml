@@ -17,18 +17,12 @@ install:
     Copy-Item -Path ./psaws -Destination "C:\Program Files\WindowsPowerShell\Modules\psaws" -Recurse
 build: off
 test_script:
-- ps: >-
-        $testResultsFile = ".\TestsResults.xml"
-
-        $res = Invoke-Pester -OutputFormat NUnitXml -OutputFile $testResultsFile -PassThru
-
-        (New-Object 'System.Net.WebClient').UploadFile("https://ci.appveyor.com/api/testresults/nunit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path $testResultsFile))
-
-        if ($res.FailedCount -gt 0) { 
-
-            throw "$($res.FailedCount) tests failed."
-
-        }
+  - ps: .\Tests\appveyor.pester.ps1 
+  - ps: powershell.exe -version 2.0 -executionpolicy bypass -noprofile -file .\tests\Appveyor.Pester.ps1 -Version 2
+  - ps: powershell.exe -version 3.0 -executionpolicy bypass -noprofile -file .\tests\Appveyor.Pester.ps1 -Version 3
+  - ps: powershell.exe -version 4.0 -executionpolicy bypass -noprofile -file .\tests\Appveyor.Pester.ps1 -Version 4
+  - ps: powershell.exe -version 5.0 -executionpolicy bypass -noprofile -file .\tests\Appveyor.Pester.ps1 -Version 5
+  - ps: .\tests\Appveyor.Pester.ps1 -Finalize
 deploy_script:
 
 - ps: if ($env:APPVEYOR_REPO_COMMIT_MESSAGE -eq '#deploy') {Publish-Module -Name psaws -NuGetApiKey $env:psgallery_apiKey -Verbose}
