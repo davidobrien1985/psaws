@@ -50,3 +50,60 @@ Function Get-AwsEc2WithPublicIp {
     $ec2CfnInstances.Instances.InstanceId
   }
 }
+
+Function Test-AwsEc2PublicIp {
+
+  param (
+    [Parameter(mandatory=$true,
+        HelpMessage='Specifiy Instance Id of EC2 instance',
+        ParameterSetName='instanceId'
+    )]
+    [string]$instanceId,
+
+    [Parameter(
+      ParameterSetName='instanceId')]
+    [ValidateScript({$_ -cin ([Amazon.RegionEndpoint]::EnumerableAllRegions).SystemName})]
+    [string]$region = (Get-DefaultAWSRegion),
+
+    [Parameter(mandatory=$true,
+        ParameterSetName='instanceObject',
+        ValueFromPipeline=$true
+    )]
+    [Amazon.EC2.Model.Instance[]]$instanceObject,
+
+    [Parameter(mandatory=$true,
+        ParameterSetName='reservationObject',
+        ValueFromPipeline=$true
+    )]
+    [Amazon.EC2.Model.Reservation]$reservationObject
+  )
+
+  Begin {
+
+  }
+  Process {
+
+    if ($instanceId) {
+      Write-Verbose 'instanceId'
+      $ec2Instances = (Get-EC2Instance -InstanceId $instanceId -Region $region).Instances
+    }
+
+    elseif ($reservationObject) {
+      Write-Verbose 'Reservation'
+      $ec2Instances = $reservationObject.Instances
+    }
+
+    elseif ($instanceObject) {
+      Write-Verbose 'instance object'
+      $ec2Instances = $instanceObject
+    }
+
+    if ($ec2Instances.PublicIpAddress -ne $null) {
+      return $true
+    }
+    else {
+      return $false
+    }
+  }
+  End {}
+}

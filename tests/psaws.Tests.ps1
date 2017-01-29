@@ -92,5 +92,45 @@ InModuleScope 'psaws' {
         {Get-AwsEc2WithPublicIp -region 'ant-verycold-1'} | Should throw
       }
     }
+    Context 'Testing Test-AwsEc2PublicIp' {
+      Mock -CommandName Get-EC2Instance -MockWith {
+        return  @{ Instances = @(@{PublicIpAddress = '1.1.1.1'})
+        }
+      }
+      
+      It 'should return $true if instance has public IP' {
+        Test-AwsEc2PublicIp -instanceId i-1234567 -region ap-southeast-1 | Should Be $true
+      }
+      It 'should not return $false if instance has public IP' {
+        Test-AwsEc2PublicIp -instanceId i-1234567 -region ap-southeast-1 | Should Not Be $false
+      }
+
+      # Now the Instance has no Public IP anymore.
+      Mock -CommandName Get-EC2Instance -MockWith {
+        return  @{ Instances = @(@{PublicIpAddress = $null})
+        }
+      }
+      It 'should return $false if instance has no public IP' {
+
+        Test-AwsEc2PublicIp -instanceId i-1234567 -region ap-southeast-1 | Should Be $false
+      }
+      It 'should not return $true if instance has no public IP' {
+
+        Test-AwsEc2PublicIp -instanceId i-1234567 -region ap-southeast-1 | Should Not Be $true
+      }
+      It 'should only execute the Get-EC2Instance cmdlet if ParameterSet instanceId is executed' {
+        Test-AwsEc2PublicIp -instanceId i-1234567 -region ap-southeast-1
+        Assert-MockCalled -CommandName Get-EC2Instance -Exactly 1 -Scope It
+      }
+      It 'should not execute Get-EC2Instance if the ParameterSet reservationObject is used' {
+        $obj = [Amazon.EC2.Model.Reservation]::new() 
+        $obj.Instances = [Amazon.EC2.Model.Instance]::new()
+        $obj | Test-AwsEc2PublicIp
+        Assert-MockCalled -CommandName Get-EC2Instance -Exactly 0 -Scope It
+      }
+      It 'should throw with unknown AWS region' {
+        {Test-AwsEc2PublicIp -instanceId i-123456 -region 'ant-verycold-1'} | Should throw
+      }
+    } 
   }
 }
