@@ -1,5 +1,4 @@
-﻿
-Function Connect-AwsMfa {
+﻿Function Connect-AwsMfa {
   param (
     [Parameter(mandatory=$true,HelpMessage='Specify the AWS region')]
     [ValidateScript({$_ -cin ([Amazon.RegionEndpoint]::EnumerableAllRegions).SystemName})]
@@ -11,7 +10,7 @@ Function Connect-AwsMfa {
     [ValidateLength(6,6)]
     [string]$mfaToken
   )
-  
+
   $parameters = @{
     'Region' = $region
     'ProfileName' = $awsProfile
@@ -19,7 +18,7 @@ Function Connect-AwsMfa {
   }
 
   $mfaDeviceArn = (Get-IAMMFADevice @parameters).SerialNumber
-  
+
   $parameters = @{
     DurationInSeconds = 900
     TokenCode = $mfaToken
@@ -27,7 +26,27 @@ Function Connect-AwsMfa {
     ProfileName = $awsProfile
     Region = $region
   }
-  
+
   $sts = Get-STSSessionToken -DurationInSeconds 900 -SerialNumber $mfaDeviceArn -TokenCode $mfaToken -Region $region -ProfileName $awsProfile -Verbose
   $sts
+}
+
+Function Get-AwsEc2WithPublicIp {
+  param (
+    [Parameter()]
+    [ValidateScript({$_ -cin ([Amazon.RegionEndpoint]::EnumerableAllRegions).SystemName})]
+    [AllowEmptyString()]
+    [string]$region = ''
+  )
+
+  if ($region -eq '') {
+
+    $ec2CfnInstances = (Get-EC2Instance).Where{$PSItem.Instances.PublicIpAddress -ne $null}
+    $ec2CfnInstances.Instances.InstanceId
+
+  }
+  else {
+    $ec2CfnInstances = (Get-EC2Instance -Region $region).Where{$PSItem.Instances.PublicIpAddress -ne $null}
+    $ec2CfnInstances.Instances.InstanceId
+  }
 }

@@ -84,5 +84,13 @@ InModuleScope 'psaws' {
         (Connect-AwsMfa -region ap-southeast-2 -awsUserName me@david-obrien.net -awsProfile default -mfaToken 123456).SessionToken | Should BeExactly 'FQoDYXdzEOP//////////wEaDHp0FwMRVel8FLRuyKvAW+KrrwLyN2z5E42WSOduMlXMiZF5op2HwFjXBhh2VT8f8k2t4g1yaI9+flvbpd/f1b7'
       }
     }
+    Context 'Testing Get-AwsEc2WithPublicIp' {
+      It 'should return Instance-IDs, not sure how to test this without mocking everything away' {
+        $true | Should Be $true
+      }
+      It 'should throw with unknown AWS region' {
+        {Get-AwsEc2WithPublicIp -region 'ant-verycold-1'} | Should throw
+      }
+    }
   }
 }
