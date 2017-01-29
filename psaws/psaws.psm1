@@ -1,4 +1,5 @@
-﻿Function Connect-AwsMfa {
+﻿#requires -Module AwsPowerShell
+Function Connect-AwsMfa {
   param (
     [Parameter(mandatory=$true,HelpMessage='Specify the AWS region')]
     [ValidateScript({$_ -cin ([Amazon.RegionEndpoint]::EnumerableAllRegions).SystemName})]
@@ -52,7 +53,7 @@ Function Get-AwsEc2WithPublicIp {
 }
 
 Function Test-AwsEc2PublicIp {
-
+  
   param (
     [Parameter(mandatory=$true,
         HelpMessage='Specifiy Instance Id of EC2 instance',
@@ -106,4 +107,15 @@ Function Test-AwsEc2PublicIp {
     }
   }
   End {}
+}
+
+Function Get-AwsEc2Windows {
+  param (
+    [Parameter()]
+    [ValidateScript({$_ -cin ([Amazon.RegionEndpoint]::EnumerableAllRegions).SystemName})]
+    [AllowEmptyString()]
+    [string]$region = ''
+  )
+
+  ((Get-EC2Instance -Region $region).Instances).Where({$PSItem.Platform -eq 'Windows'}) | Select-Object -Property InstanceId
 }
