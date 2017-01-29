@@ -53,7 +53,7 @@ Function Get-AwsEc2WithPublicIp {
 }
 
 Function Test-AwsEc2PublicIp {
-  
+  [OutputType([System.Boolean])]
   param (
     [Parameter(mandatory=$true,
         HelpMessage='Specifiy Instance Id of EC2 instance',
