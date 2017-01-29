@@ -131,6 +131,24 @@ InModuleScope 'psaws' {
       It 'should throw with unknown AWS region' {
         {Test-AwsEc2PublicIp -instanceId i-123456 -region 'ant-verycold-1'} | Should throw
       }
+    }
+    
+    Context 'Testing Get-AwsEc2Windows' {
+      Mock -CommandName Get-EC2Instance -MockWith {
+        return  @{ Instances = @(@{Platform = 'Windows'
+                                   InstanceId = 'i-1234567'})
+        }
+      }
+      
+      It 'should throw with unknown AWS region' {
+        {Get-AwsEc2Windows -region ant-verycold-1} | Should throw
+      }
+      It 'should not throw with known AWS region' {
+        {Get-AwsEc2Windows -region ap-southeast-1} | Should not throw
+      }
+      It 'should output the instance ID only' {
+        Get-AwsEc2Windows -region ap-southeast-1 | Should Be 'i-1234567'
+      }
     } 
   }
 }

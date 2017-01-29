@@ -117,5 +117,5 @@ Function Get-AwsEc2Windows {
     [string]$region = ''
   )
 
-  ((Get-EC2Instance -Region $region).Instances).Where({$PSItem.Platform -eq 'Windows'}) | Select-Object -Property InstanceId
+  ((Get-EC2Instance -Region $region).Instances).Where({$PSItem.Platform -eq 'Windows'}).InstanceId
 }
