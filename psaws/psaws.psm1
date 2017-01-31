@@ -5,12 +5,14 @@ Function Connect-AwsMfa {
     [ValidateScript({$_ -cin ([Amazon.RegionEndpoint]::EnumerableAllRegions).SystemName})]
     [string]$region,
     [string]$awsProfile = 'default',
-    [Parameter(mandatory=$true,HelpMessage='Specify the user name associated with this profile and MFA token')]
-    [string]$awsUserName,
+    [Parameter(mandatory=$false)]
+    [int]$duration = 900,
     [Parameter(mandatory=$true,HelpMessage='Specify the MFA Token that is currently valid')]
     [ValidateLength(6,6)]
     [string]$mfaToken
   )
+  
+  $awsUserName = (Get-STSCallerIdentity -Region $region -ProfileName $awsProfile).Arn.Split('/')[1]
 
   $parameters = @{
     'Region' = $region
@@ -21,7 +23,7 @@ Function Connect-AwsMfa {
   $mfaDeviceArn = (Get-IAMMFADevice @parameters).SerialNumber
 
   $parameters = @{
-    DurationInSeconds = 900
+    DurationInSeconds = $duration
     TokenCode = $mfaToken
     SerialNumber = $mfaDeviceArn
     ProfileName = $awsProfile

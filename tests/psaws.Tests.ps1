@@ -58,30 +58,30 @@ InModuleScope 'psaws' {
       }
   
       It 'should not accept MFA Tokens shorter than 6 digits' {
-        {Connect-AwsMfa -region ap-southeast-2 -awsUserName me@david-obrien.net -awsProfile default -mfaToken 12345} | Should throw
+        {Connect-AwsMfa -region ap-southeast-2 -awsProfile default -mfaToken 12345} | Should throw
       }
   
       It 'should not accept MFA Tokens longer than 6 digits' {
-        {Connect-AwsMfa -region ap-southeast-2 -awsUserName me@david-obrien.net -awsProfile default -mfaToken 1234567} | Should throw
+        {Connect-AwsMfa -region ap-southeast-2 -awsProfile default -mfaToken 1234567} | Should throw
       }
     
       It 'should accept known AWS regions (Jan 2017)' {
         $regions = Get-AWSRegion
         foreach ($region in $regions) {
           $region
-          {Connect-AwsMfa -region $region -awsUserName me@david-obrien.net -awsProfile default -mfaToken 123456} | Should not throw
+          {Connect-AwsMfa -region $region -awsProfile default -mfaToken 123456} | Should not throw
         }
       }
     
       It 'should throw with unknown AWS region' {
-        {Connect-AwsMfa -region 'ant-verycold-1' -awsUserName me@david-obrien.net -awsProfile default -mfaToken 123456} | Should throw
+        {Connect-AwsMfa -region 'ant-verycold-1' -awsProfile default -mfaToken 123456} | Should throw
       }
   
       It 'checks the output of Connect-AwsMfa' {
-        Connect-AwsMfa -region ap-southeast-2 -awsUserName me@david-obrien.net -awsProfile default -mfaToken 123456 | Should BeOfType Hashtable
-        (Connect-AwsMfa -region ap-southeast-2 -awsUserName me@david-obrien.net -awsProfile default -mfaToken 123456).AccessKey | Should BeExactly 'ASIAIRAOHDFIYJBKF4GA'
-        (Connect-AwsMfa -region ap-southeast-2 -awsUserName me@david-obrien.net -awsProfile default -mfaToken 123456).SecretKey | Should BeExactly 'LC8/e/IfDbLHBhnVkIEfhFgaA4/FQel8FLRuUrXeS'
-        (Connect-AwsMfa -region ap-southeast-2 -awsUserName me@david-obrien.net -awsProfile default -mfaToken 123456).SessionToken | Should BeExactly 'FQoDYXdzEOP//////////wEaDHp0FwMRVel8FLRuyKvAW+KrrwLyN2z5E42WSOduMlXMiZF5op2HwFjXBhh2VT8f8k2t4g1yaI9+flvbpd/f1b7'
+        Connect-AwsMfa -region ap-southeast-2 -awsProfile default -mfaToken 123456 | Should BeOfType Hashtable
+        (Connect-AwsMfa -region ap-southeast-2 -awsProfile default -mfaToken 123456).AccessKey | Should BeExactly 'ASIAIRAOHDFIYJBKF4GA'
+        (Connect-AwsMfa -region ap-southeast-2 -awsProfile default -mfaToken 123456).SecretKey | Should BeExactly 'LC8/e/IfDbLHBhnVkIEfhFgaA4/FQel8FLRuUrXeS'
+        (Connect-AwsMfa -region ap-southeast-2 -awsProfile default -mfaToken 123456).SessionToken | Should BeExactly 'FQoDYXdzEOP//////////wEaDHp0FwMRVel8FLRuyKvAW+KrrwLyN2z5E42WSOduMlXMiZF5op2HwFjXBhh2VT8f8k2t4g1yaI9+flvbpd/f1b7'
       }
     }
     Context 'Testing Get-AwsEc2WithPublicIp' {
