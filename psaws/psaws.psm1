@@ -30,7 +30,7 @@ Function Connect-AwsMfa {
     Region = $region
   }
 
-  $sts = Get-STSSessionToken -DurationInSeconds 900 -SerialNumber $mfaDeviceArn -TokenCode $mfaToken -Region $region -ProfileName $awsProfile -Verbose
+  $sts = Get-STSSessionToken -DurationInSeconds $duration -SerialNumber $mfaDeviceArn -TokenCode $mfaToken -Region $region -ProfileName $awsProfile -Verbose
   $sts
 }
 
@@ -120,4 +120,17 @@ Function Get-AwsEc2Windows {
   )
 
   ((Get-EC2Instance -Region $region).Instances).Where({$PSItem.Platform -eq 'Windows'}).InstanceId
+}
+
+Function Get-AwsEc2WithoutIamInstanceProfile {
+  param (
+    [Parameter()]
+    [ValidateScript({$_ -cin ([Amazon.RegionEndpoint]::EnumerableAllRegions).SystemName})]
+    [AllowEmptyString()]
+    [string]$region = ''
+  )
+
+  $ec2Instances = (Get-EC2Instance -Region $region).Where({$PSItem.Instances.IamInstanceProfile -eq $null})
+  $ec2Instances.Instances.InstanceId
+
 }
