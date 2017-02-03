@@ -122,15 +122,61 @@ Function Get-AwsEc2Windows {
   ((Get-EC2Instance -Region $region).Instances).Where({$PSItem.Platform -eq 'Windows'}).InstanceId
 }
 
-Function Get-AwsEc2WithoutIamInstanceProfile {
+Function Get-AwsEc2IamInstanceProfileStatus {
   param (
+    [Parameter(ParameterSetName='with')]
+    [switch]$with,
+    [Parameter(ParameterSetName='without')]
+    [switch]$without,
     [Parameter()]
     [ValidateScript({$_ -cin ([Amazon.RegionEndpoint]::EnumerableAllRegions).SystemName})]
     [AllowEmptyString()]
-    [string]$region = ''
+    [string]$region = (Get-DefaultAWSRegion)
   )
+  if ($with) {
+    $ec2Instances = (Get-EC2Instance -Region $region).Where({$PSItem.Instances.IamInstanceProfile -ne $null})
+    $ec2Instances.Instances.InstanceId
+  }
+  if ($without) {
+    $ec2Instances = (Get-EC2Instance -Region $region).Where({$PSItem.Instances.IamInstanceProfile -eq $null})
+    $ec2Instances.Instances.InstanceId
+  }
+}
 
-  $ec2Instances = (Get-EC2Instance -Region $region).Where({$PSItem.Instances.IamInstanceProfile -eq $null})
-  $ec2Instances.Instances.InstanceId
-
+Function Get-AwsEc2IamPolicyDocument {
+  param (
+    [Parameter()]
+    [string]$instanceId
+    ,
+    [Parameter()]
+    [ValidateScript({$_ -cin ([Amazon.RegionEndpoint]::EnumerableAllRegions).SystemName})]
+    [AllowEmptyString()]
+    [string]$region = "$(Get-DefaultAWSRegion)"
+  )
+  
+  $ec2instance = Get-EC2Instance -InstanceId $instanceId -Region $region
+  
+  
+  $iam = $ec2Instance.Instances.IamInstanceProfile.Arn
+  
+  [System.Reflection.Assembly]::LoadWithPartialName("System.Web.HttpUtility")
+  
+  $iamRoleName = (Get-IAMInstanceProfile -InstanceProfileName $iam.Split('/')[1]).Roles.RoleName
+  $iamRolePolicies = Get-IAMRolePolicies -RoleName $iamRoleName
+  
+  foreach ($iamRolePolicy in $iamRolePolicies) {
+    $rolePolicy = (Get-IAMRolePolicy -PolicyName $iamRolePolicy -RoleName $iamRoleName).PolicyDocument
+    if ($rolePolicy) {
+      [System.Web.HttpUtility]::UrlDecode($rolePolicy)
+    }
+    else {
+      $managedPolicies = Get-IAMAttachedRolePolicies -RoleName $iamRoleName
+      if ($managedPolicies) {
+        foreach ($managedPolicy in $managedPolicies) {
+          $policy = Get-IAMPolicy -PolicyArn $managedPolicy.Arn
+          [System.Web.HttpUtility]::UrlDecode((Get-IAMPolicyVersion -PolicyArn $policy.Arn -VersionId $policy.DefaultVersionId).Document)
+        }
+      }
+    }
+  }
 }
