@@ -30,7 +30,7 @@ Function Connect-AwsMfa {
     Region = $region
   }
 
-  $sts = Get-STSSessionToken -DurationInSeconds $duration -SerialNumber $mfaDeviceArn -TokenCode $mfaToken -Region $region -ProfileName $awsProfile -Verbose
+  $sts = Get-STSSessionToken @parameters
   $sts
 }
 
