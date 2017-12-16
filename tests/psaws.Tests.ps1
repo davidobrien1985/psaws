@@ -56,6 +56,12 @@ InModuleScope 'psaws' {
           SessionToken = 'FQoDYXdzEOP//////////wEaDHp0FwMRVel8FLRuyKvAW+KrrwLyN2z5E42WSOduMlXMiZF5op2HwFjXBhh2VT8f8k2t4g1yaI9+flvbpd/f1b7'
         }
       }
+
+      Mock -CommandName Get-STSCallerIdentity -MockWith {
+        return @{
+          Arn = '41334344134/david.obrien'
+        }
+      }
   
       It 'should not accept MFA Tokens shorter than 6 digits' {
         {Connect-AwsMfa -region ap-southeast-2 -awsProfile default -mfaToken 12345} | Should throw
