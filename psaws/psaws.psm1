@@ -1,33 +1,33 @@
 ﻿#requires -Module AwsPowerShell
 Function Connect-AwsMfa {
   param (
-    [Parameter(mandatory=$true,HelpMessage='Specify the AWS region')]
-    [ValidateScript({$_ -cin ([Amazon.RegionEndpoint]::EnumerableAllRegions).SystemName})]
+    [Parameter(mandatory = $true, HelpMessage = 'Specify the AWS region')]
+    [ValidateScript( {$_ -cin ([Amazon.RegionEndpoint]::EnumerableAllRegions).SystemName})]
     [string]$region,
     [string]$awsProfile = 'default',
-    [Parameter(mandatory=$false)]
+    [Parameter(mandatory = $false)]
     [int]$duration = 900,
-    [Parameter(mandatory=$true,HelpMessage='Specify the MFA Token that is currently valid')]
-    [ValidateLength(6,6)]
+    [Parameter(mandatory = $true, HelpMessage = 'Specify the MFA Token that is currently valid')]
+    [ValidateLength(6, 6)]
     [string]$mfaToken
   )
   
   $awsUserName = (Get-STSCallerIdentity -Region $region -ProfileName $awsProfile).Arn.Split('/')[1]
 
   $parameters = @{
-    'Region' = $region
+    'Region'      = $region
     'ProfileName' = $awsProfile
-    'UserName' = $awsUserName
+    'UserName'    = $awsUserName
   }
 
   $mfaDeviceArn = (Get-IAMMFADevice @parameters).SerialNumber
 
   $parameters = @{
     DurationInSeconds = $duration
-    TokenCode = $mfaToken
-    SerialNumber = $mfaDeviceArn
-    ProfileName = $awsProfile
-    Region = $region
+    TokenCode         = $mfaToken
+    SerialNumber      = $mfaDeviceArn
+    ProfileName       = $awsProfile
+    Region            = $region
   }
 
   $sts = Get-STSSessionToken @parameters
@@ -37,7 +37,7 @@ Function Connect-AwsMfa {
 Function Get-AwsEc2WithPublicIp {
   param (
     [Parameter()]
-    [ValidateScript({$_ -cin ([Amazon.RegionEndpoint]::EnumerableAllRegions).SystemName})]
+    [ValidateScript( {$_ -cin ([Amazon.RegionEndpoint]::EnumerableAllRegions).SystemName})]
     [AllowEmptyString()]
     [string]$region = ''
   )
@@ -57,26 +57,26 @@ Function Get-AwsEc2WithPublicIp {
 Function Test-AwsEc2PublicIp {
   [OutputType([System.Boolean])]
   param (
-    [Parameter(mandatory=$true,
-        HelpMessage='Specifiy Instance Id of EC2 instance',
-        ParameterSetName='instanceId'
+    [Parameter(mandatory = $true,
+      HelpMessage = 'Specifiy Instance Id of EC2 instance',
+      ParameterSetName = 'instanceId'
     )]
     [string]$instanceId,
 
     [Parameter(
-      ParameterSetName='instanceId')]
-    [ValidateScript({$_ -cin ([Amazon.RegionEndpoint]::EnumerableAllRegions).SystemName})]
+      ParameterSetName = 'instanceId')]
+    [ValidateScript( {$_ -cin ([Amazon.RegionEndpoint]::EnumerableAllRegions).SystemName})]
     [string]$region = (Get-DefaultAWSRegion),
 
-    [Parameter(mandatory=$true,
-        ParameterSetName='instanceObject',
-        ValueFromPipeline=$true
+    [Parameter(mandatory = $true,
+      ParameterSetName = 'instanceObject',
+      ValueFromPipeline = $true
     )]
     [Amazon.EC2.Model.Instance[]]$instanceObject,
 
-    [Parameter(mandatory=$true,
-        ParameterSetName='reservationObject',
-        ValueFromPipeline=$true
+    [Parameter(mandatory = $true,
+      ParameterSetName = 'reservationObject',
+      ValueFromPipeline = $true
     )]
     [Amazon.EC2.Model.Reservation]$reservationObject
   )
@@ -114,31 +114,31 @@ Function Test-AwsEc2PublicIp {
 Function Get-AwsEc2Windows {
   param (
     [Parameter()]
-    [ValidateScript({$_ -cin ([Amazon.RegionEndpoint]::EnumerableAllRegions).SystemName})]
+    [ValidateScript( {$_ -cin ([Amazon.RegionEndpoint]::EnumerableAllRegions).SystemName})]
     [AllowEmptyString()]
     [string]$region = ''
   )
 
-  ((Get-EC2Instance -Region $region).Instances).Where({$PSItem.Platform -eq 'Windows'}).InstanceId
+  ((Get-EC2Instance -Region $region).Instances).Where( {$PSItem.Platform -eq 'Windows'}).InstanceId
 }
 
 Function Get-AwsEc2IamInstanceProfileStatus {
   param (
-    [Parameter(ParameterSetName='with')]
+    [Parameter(ParameterSetName = 'with')]
     [switch]$with,
-    [Parameter(ParameterSetName='without')]
+    [Parameter(ParameterSetName = 'without')]
     [switch]$without,
     [Parameter()]
-    [ValidateScript({$_ -cin ([Amazon.RegionEndpoint]::EnumerableAllRegions).SystemName})]
+    [ValidateScript( {$_ -cin ([Amazon.RegionEndpoint]::EnumerableAllRegions).SystemName})]
     [AllowEmptyString()]
     [string]$region = (Get-DefaultAWSRegion)
   )
   if ($with) {
-    $ec2Instances = (Get-EC2Instance -Region $region).Where({$PSItem.Instances.IamInstanceProfile -ne $null})
+    $ec2Instances = (Get-EC2Instance -Region $region).Where( {$PSItem.Instances.IamInstanceProfile -ne $null})
     $ec2Instances.Instances.InstanceId
   }
   if ($without) {
-    $ec2Instances = (Get-EC2Instance -Region $region).Where({$PSItem.Instances.IamInstanceProfile -eq $null})
+    $ec2Instances = (Get-EC2Instance -Region $region).Where( {$PSItem.Instances.IamInstanceProfile -eq $null})
     $ec2Instances.Instances.InstanceId
   }
 }
@@ -149,7 +149,7 @@ Function Get-AwsEc2IamPolicyDocument {
     [string]$instanceId
     ,
     [Parameter()]
-    [ValidateScript({$_ -cin ([Amazon.RegionEndpoint]::EnumerableAllRegions).SystemName})]
+    [ValidateScript( {$_ -cin ([Amazon.RegionEndpoint]::EnumerableAllRegions).SystemName})]
     [AllowEmptyString()]
     [string]$region = "$(Get-DefaultAWSRegion)"
   )
@@ -179,4 +179,24 @@ Function Get-AwsEc2IamPolicyDocument {
       }
     }
   }
+}
+
+Function Get-AWSEc2Region {
+  <#
+  .SYNOPSIS
+    Gets AWS Region from EC2
+  .DESCRIPTION
+    Executed on an AWS Windows EC2 this will return the AWS Region the EC2 is deployed to.
+  .EXAMPLE
+    PS C:\> Get-AwsEc2Region
+    Will return the AWS Region name
+  .INPUTS
+    Inputs (if any)
+  .OUTPUTS
+    String of AWS Region name
+  .NOTES
+    Only works on an AWS EC2
+  #>
+  $doc = (Invoke-WebRequest 169.254.169.254/latest/dynamic/instance-identity/document).Content | ConvertFrom-Json
+  $doc.region
 }
